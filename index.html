@@ -1,67 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GMIS Virtual Journey</title>
-  <link rel="icon" type="image/png" href="favicon.png" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    iframe {
-      width: 100%;
-      height: 100vh;
-      border: none;
-    }
-    section {
-      margin-bottom: 3rem;
-    }
-    .section-title {
-      font-size: 1.875rem;
-      font-weight: bold;
-      text-align: center;
-      color: #0E2A47;
-      margin: 2rem 0 1rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMIS Prospective Parents Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gmis: {
+                            lightBlue: '#D4E9F7',
+                            gold: '#E1A948',
+                            navy: '#0E2A47',
+                            grey: '#4A4A4A',
+                            mist: '#F7F9FA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .journey-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .journey-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(14, 42, 71, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 90%;
+            width: 1200px;
+            height: 800px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: auto;
+        }
+        .iframe-container {
+            width: 100%;
+            height: 100%;
+        }
+        .exit-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #E1A948;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 1100;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .exit-button:hover {
+            background-color: #0E2A47;
+        }
+        .mars-card {
+            background-image: url('https://d41chssnpqdne.cloudfront.net/user_upload_by_module/chat_bot/files/80294998/p0u1UHwHuiqnBdMu.png');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            height: 300px;
+        }
+        .mars-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 60%, rgba(14, 42, 71, 0.8) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 15px;
+        }
+        .curriculum-content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
-<body class="bg-gmis-mist">
+<body class="bg-gmis-mist font-sans">
+    <nav class="bg-gmis-navy text-white p-4 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+            <img src="gmis-logo.png" alt="GMIS Logo" class="h-10">
+            <span class="font-bold text-xl">GMIS Prospective Parents Journey</span>
+        </div>
+        <div class="flex space-x-4 items-center">
+            <div class="language-dropdown relative">
+                <button id="language-toggle" class="flex items-center space-x-2 bg-gmis-gold px-3 py-2 rounded">
+                    <span id="current-language">Language</span>
+                    <i class="ri-arrow-down-s-line"></i>
+                </button>
+                <div id="language-menu" class="hidden absolute right-0 mt-2 bg-white text-gmis-navy rounded shadow-lg">
+                    <button onclick="changeLanguage('en')" class="block w-full text-left px-4 py-2 hover:bg-gmis-lightBlue">
+                        <img src="en-flag.png" alt="English" class="inline-block h-4 w-6 mr-2">English
+                    </button>
+                    <button onclick="changeLanguage('ko')" class="block w-full text-left px-4 py-2 hover:bg-gmis-lightBlue">
+                        <img src="ko-flag.png" alt="Korean" class="inline-block h-4 w-6 mr-2">한국어
+                    </button>
+                    <button onclick="changeLanguage('hi')" class="block w-full text-left px-4 py-2 hover:bg-gmis-lightBlue">
+                        <img src="hi-flag.png" alt="Hindi" class="inline-block h-4 w-6 mr-2">हिन्दी
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-  <main>
+    <div id="modal-container" class="hidden modal-overlay">
+        <div class="modal-content">
+            <div id="exit-button" class="exit-button" onclick="closeModal()">
+                <i class="ri-close-line mr-2"></i>Back to Journey
+            </div>
+            <iframe id="journey-iframe" class="iframe-container" src="" frameborder="0"></iframe>
+        </div>
+    </div>
 
-    <section aria-label="Envelope Intro">
-      <iframe src="https://sthe8121.github.io/gmis-gallery-walk-intro/" title="Gallery Walk Intro"></iframe>
-    </section>
+    <div id="curriculum-modal" class="hidden modal-overlay">
+        <div class="modal-content overflow-auto">
+            <div class="exit-button" onclick="closeCurriculumModal()">
+                <i class="ri-close-line mr-2"></i>Close
+            </div>
+            <div class="curriculum-content">
+                <h1 class="text-3xl font-bold text-gmis-navy mb-6">GMIS Curriculum Pathways</h1>
+                
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-gmis-navy mb-4">Early Years Foundation Stage (EYFS)</h2>
+                    <p>Holistic development focusing on play-based learning, social skills, and foundational academic concepts.</p>
+                </section>
 
-    <section aria-label="Values & Heritage">
-      <h2 class="section-title">Values & Heritage</h2>
-      <iframe src="https://sthe8121.github.io/values-heritage/" title="Values and Heritage"></iframe>
-    </section>
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-gmis-navy mb-4">Primary Years (Grades 1-5)</h2>
+                    <p>Cambridge International Primary Programme with integrated STEAM approach.</p>
+                    <ul class="list-disc pl-5">
+                        <li>Core subjects with emphasis on critical thinking</li>
+                        <li>Introduction to multiple languages</li>
+                        <li>Arts and physical education integration</li>
+                    </ul>
+                </section>
 
-    <section aria-label="Clubs & Enrichment">
-      <h2 class="section-title">Clubs & Enrichment</h2>
-      <iframe src="https://sthe8121.github.io/clubs-carousel/" title="Clubs Carousel"></iframe>
-    </section>
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-gmis-navy mb-4">Secondary Years (Grades 6-10)</h2>
+                    <p>Cambridge Lower Secondary and IGCSE preparation.</p>
+                    <ul class="list-disc pl-5">
+                        <li>Subject specialization begins</li>
+                        <li>Advanced project-based learning</li>
+                        <li>Global citizenship modules</li>
+                    </ul>
+                </section>
 
-    <section aria-label="Gandhi Citizenship">
-      <h2 class="section-title">Gandhi: Global Citizenship Gallery</h2>
-      <iframe src="https://sthe8121.github.io/gandhi-global-citizenship/" title="Gandhi Gallery"></iframe>
-    </section>
+                <section class="mb-8">
+                    <h2 class="text-2xl font-bold text-gmis-navy mb-4">Grade 11 – Grade 12: Matriculation & Higher Secondary</h2>
+                    <p>This track supports students from Indian schooling backgrounds (CBSE, ICSE) who continue in a structured subject-based progression.</p>
+                    <ul class="list-disc pl-5">
+                        <li>English Core</li>
+                        <li>Mathematics / Applied Math</li>
+                        <li>Business Studies / Accountancy / Economics</li>
+                        <li>Science: Physics / Chemistry / Biology</li>
+                        <li>Hindi or local second language</li>
+                    </ul>
+                    <p class="mt-4 bg-yellow-100 p-3 rounded">
+                        <strong>Note:</strong> Curriculum details are subject to annual review. Need further clarifications from the Board regarding specific subject offerings and potential modifications.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
 
-    <section aria-label="Lincoln Mask">
-      <h2 class="section-title">Lincoln: The Curator Club</h2>
-      <iframe src="https://sthe8121.github.io/gallery-walk-lincoln-mask/" title="Lincoln Gallery"></iframe>
-    </section>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gmis-navy mb-6">
+            Discover Your GMIS Journey
+        </h1>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <!-- Gallery Walk Intro -->
+            <div class="bg-white p-6 rounded-lg shadow-lg journey-card" onclick="loadJourney('intro')">
+                <h3 class="text-xl font-bold text-gmis-navy mb-4">Gallery Walk Intro</h3>
+                <button class="w-full bg-gmis-gold text-white py-3 rounded-lg hover:bg-gmis-navy transition-colors">
+                    <i class="ri-image-line mr-2"></i>
+                    Start Journey
+                </button>
+            </div>
 
-    <section aria-label="Mars Field Trip">
-      <h2 class="section-title">Field Trip: Mission to Mars</h2>
-      <iframe src="https://sthe8121.github.io/field-trips-mars/" title="Mars Education"></iframe>
-    </section>
+            <!-- Values -->
+            <div class="bg-white p-6 rounded-lg shadow-lg journey-card" onclick="loadJourney('values')">
+                <h3 class="text-xl font-bold text-gmis-navy mb-4">Our Values</h3>
+                <button class="w-full bg-gmis-gold text-white py-3 rounded-lg hover:bg-gmis-navy transition-colors">
+                    <i class="ri-heart-line mr-2"></i>
+                    Discover Values
+                </button>
+            </div>
 
-  </main>
+            <!-- Clubs -->
+            <div class="bg-white p-6 rounded-lg shadow-lg journey-card" onclick="loadJourney('clubs')">
+                <h3 class="text-xl font-bold text-gmis-navy mb-4">School Clubs</h3>
+                <button class="w-full bg-gmis-gold text-white py-3 rounded-lg hover:bg-gmis-navy transition-colors">
+                    <i class="ri-group-line mr-2"></i>
+                    Explore Clubs
+                </button>
+            </div>
 
-  <footer class="bg-gmis-navy text-white text-center py-6">
-    &copy; 2025 Gandhi Memorial Intercontinental School Semarang. All rights reserved.
-  </footer>
+            <!-- Curriculum -->
+            <div class="bg-white p-6 rounded-lg shadow-lg journey-card" onclick="openCurriculumModal()">
+                <h3 class="text-xl font-bold text-gmis-navy mb-4">Curriculum</h3>
+                <button class="w-full bg-gmis-gold text-white py-3 rounded-lg hover:bg-gmis-navy transition-colors">
+                    <i class="ri-book-open-line mr-2"></i>
+                    Explore Curriculum
+                </button>
+            </div>
 
+            <!-- Mars Mission -->
+            <div class="bg-white p-6 rounded-lg shadow-lg journey-card mars-card" onclick="loadJourney('mars')">
+                <div class="mars-card-overlay">
+                    <h3 class="text-xl font-bold text-white">Little Gandhi Mars Mission</h3>
+                    <p class="text-white text-sm">Explore Our Cosmic Journey</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const journeySequence = {
+            intro: {
+                url: 'https://sthe8121.github.io/gmis-gallery-walk-intro/',
+                nextSection: 'values'
+            },
+            values: {
+                url: 'https://sthe8121.github.io/values-heritage/',
+                nextSection: 'clubs'
+            },
+            clubs: {
+                url: 'https://sthe8121.github.io/clubs-carousel/',
+                nextSection: 'mars'
+            },
+            mars: {
+                url: 'https://sthe8121.github.io/field-trips-mars/',
+                nextSection: null
+            }
+        };
+
+        function loadJourney(section) {
+            const modal = document.getElementById('modal-container');
+            const iframe = document.getElementById('journey-iframe');
+            
+            modal.classList.remove('hidden');
+            iframe.src = journeySequence[section].url;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal-container');
+            const iframe = document.getElementById('journey-iframe');
+            
+            modal.classList.add('hidden');
+            iframe.src = '';
+        }
+
+        function openCurriculumModal() {
+            const curriculumModal = document.getElementById('curriculum-modal');
+            curriculumModal.classList.remove('hidden');
+        }
+
+        function closeCurriculumModal() {
+            const curriculumModal = document.getElementById('curriculum-modal');
+            curriculumModal.classList.add('hidden');
+        }
+
+        function changeLanguage(lang) {
+            const languageToggle = document.getElementById('current-language');
+            const languageMenu = document.getElementById('language-menu');
+            
+            const languages = {
+                'en': 'English',
+                'ko': '한국어',
+                'hi': 'हिन्दी'
+            };
+
+            languageToggle.textContent = languages[lang];
+            languageMenu.classList.add('hidden');
+            
+            console.log(`Language changed to ${lang}`);
+        }
+
+        // Language dropdown toggle
+        document.getElementById('language-toggle').addEventListener('click', function() {
+            const languageMenu = document.getElementById('language-menu');
+            languageMenu.classList.toggle('hidden');
+        });
+    </script>
 </body>
 </html>
